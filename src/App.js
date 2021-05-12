@@ -6,14 +6,73 @@
 
 // Import the state hook
 import React from 'react';
+import { useState } from 'react';
 // Import the Posts (plural!) and SearchBar components, since they are used inside App component
+import './components/Posts/Posts';
 // Import the dummyData
+import './dummy-data'
 import './App.css';
+import dummyData from './dummy-data';
 
 const App = () => {
   // Create a state called `posts` to hold the array of post objects, **initializing to dummyData**.
   // This state is the source of truth for the data inside the app. You won't be needing dummyData anymore.
   // To make the search bar work (which is stretch) we'd need another state to hold the search term.
+  const [posts, setposts] = useState(dummyData);
+  const [search, setSearch] = useState("");
+ 
+
+  const [search, setSearch] = useState('');
+
+  const [text, setText] = useState('');
+
+  const changeText = evt => {
+
+    const { value } = evt.target;
+
+    setText(value);
+
+  };
+
+  const submit = postId => {
+
+    const map = posts.map((post) => {
+      if (post.id === postId && text.length > 0) {
+        post.comments.push({ id: post.comments[post.comments.length - 1].id + 1, username: userData.toLowerCase(), text });
+        return post;
+      }
+      else {
+        return post;
+      }
+    });
+
+    setPosts(map);
+
+  };
+
+  const showComments = postId => {
+
+    const map = posts.map((post) => {
+      if (post.id === postId) {
+        switch(post.show) {
+          case (true): {
+            post.show = false;
+            return post;
+          }
+          default: {
+            post.show = true;
+            return post;
+          }
+        }
+      }
+      else {
+        return post;
+      }
+    });
+
+    setPosts(map);
+
+  };
 
   const likePost = postId => {
     /*
@@ -29,12 +88,62 @@ const App = () => {
      */
   };
 
-  return (
-    <div className='App'>
-      {/* Add SearchBar and Posts here to render them */}
-      {/* Check the implementation of each component, to see what props they require, if any! */}
-    </div>
-  );
+  const map = posts.map((post) => {
+    if (post.id === postId) {
+      switch (post.liked) {
+        case (true): {
+          post.likes--;
+          post.liked = false;
+          return post;
+        }
+        default: {
+          post.likes++;
+          post.liked = true;
+          return post;
+        }
+      }
+    }
+    else {
+      return post;
+    }
+
+  });
+
+  setPosts(map);
+
+};
+
+const searchPost = evt => {
+
+  const { value } = evt.target;
+
+  setSearch(value);
+
+  const filter = dummyData.filter((post) => {
+
+    if (value.length > 0) {
+      if (post.username.includes(value)) {
+        return post;
+      }
+    }
+    else {
+      return post;
+    }
+
+  });
+
+  setPosts(filter);
+
+};
+
+return (
+  <div className='App'>
+    {/* Add SearchBar and Posts here to render them */}
+    {SearchBar({ search, searchPost })}
+    {Posts({ posts, likePost, showComments, submit, text, changeText })}
+    {/* Check the implementation of each component, to see what props they require, if any! */}
+  </div>
+);
 };
 
 export default App;
